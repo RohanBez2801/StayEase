@@ -1,16 +1,23 @@
-﻿/* ==========================================
+/* ==========================================
    StayEase - Guest Management
    Add, edit, view, delete, and search guests
    ========================================== */
 
-document.addEventListener('DOMContentLoaded', function() {
-    renderGuests();
+let cachedGuests = [];
+
+document.addEventListener('DOMContentLoaded', async function() {
+    await fetchAndRenderGuests();
     document.getElementById('guestSearch').addEventListener('input', renderGuests);
 });
 
+async function fetchAndRenderGuests() {
+    cachedGuests = await getGuests();
+    renderGuests();
+}
+
 /** Display all guests in a table with search filtering. */
 function renderGuests() {
-    var guests = getGuests();
+    var guests = cachedGuests;
     var searchTerm = document.getElementById('guestSearch').value.toLowerCase();
 
     var filtered = guests.filter(function(guest) {
@@ -34,7 +41,7 @@ function renderGuests() {
         var guest = filtered[i];
         html += '<tr><td><strong>' + guest.id + '</strong></td>' +
             '<td>' + guest.name + '</td><td>' + guest.phone + '</td>' +
-            '<td>' + guest.email + '</td><td>' + guest.idNumber + '</td>' +
+            '<td>' + guest.email + '</td><td>' + (guest.idNumber || 'N/A') + '</td>' +
             '<td class="table-actions">' +
             '<button class="btn btn-sm btn-secondary" onclick="viewGuest(\'' + guest.id + '\')" title="View">👁️</button>' +
             '<button class="btn btn-sm btn-secondary" onclick="openEditGuestModal(\'' + guest.id + '\')" title="Edit">✏️</button>' +
@@ -51,8 +58,7 @@ function openAddGuestModal() {
 
 /** Open the modal to edit an existing guest. */
 function openEditGuestModal(guestId) {
-    var guests = getGuests();
-    var guest = guests.find(function(g) { return g.id === guestId; });
+    var guest = cachedGuests.find(function(g) { return g.id === guestId; });
     if (!guest) return;
     openModal('Edit Guest', getGuestFormHtml(guest));
 }
@@ -67,57 +73,56 @@ function getGuestFormHtml(guest) {
         '<input type="tel" id="guestPhone" value="' + (guest ? guest.phone : '') + '" required placeholder="e.g. 071 234 5678"></div>' +
         '<div class="form-group"><label for="guestEmail">Email Address *</label>' +
         '<input type="email" id="guestEmail" value="' + (guest ? guest.email : '') + '" required placeholder="e.g. john@email.com"></div></div>' +
-        '<div class="form-group"><label for="guestIdNumber">National ID / Passport Number *</label>' +
-        '<input type="text" id="guestIdNumber" value="' + (guest ? guest.idNumber : '') + '" required placeholder="e.g. 9501015800085"></div>' +
         '<div class="form-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>' +
         '<button type="submit" class="btn btn-primary">' + (isEdit ? 'Save Changes' : 'Add Guest') + '</button></div></form>';
 }
 
 /** Save a new or edited guest. */
-function saveGuest(event, editingId) {
+async function saveGuest(event, editingId) {
     event.preventDefault();
-    var guests = getGuests();
     var name = document.getElementById('guestName').value.trim();
     var phone = document.getElementById('guestPhone').value.trim();
     var email = document.getElementById('guestEmail').value.trim();
-    var idNumber = document.getElementById('guestIdNumber').value.trim();
 
-    if (!name || !phone || !email || !idNumber) {
+    if (!name || !phone || !email) {
         showToast('Please fill in all required fields.', 'error');
         return;
     }
     if (!validateEmail(email)) {
-        showToast('Please enter a valid email address (e.g. name@example.com).', 'error');
+        showToast('Please enter a valid email address.', 'error');
         return;
     }
 
-    if (editingId) {
-        for (var i = 0; i < guests.length; i++) {
-            if (guests[i].id === editingId) {
-                guests[i] = { id: editingId, name: name, phone: phone, email: email, idNumber: idNumber };
-                break;
-            }
-        }
-        saveGuests(guests);
-        showToast('Guest "' + name + '" updated successfully!', 'success');
+    var btn = event.target.querySelector('button[type="submit"]');
+    btn.disabled = true;
+
+    var res = await apiFetch('/api/guests.php', 'POST', {
+        action: 'save',
+        id: editingId,
+        name: name,
+        phone: phone,
+        email: email
+    });
+
+    btn.disabled = false;
+
+    if (res.success) {
+        showToast('Guest saved successfully!', 'success');
+        closeModal();
+        await fetchAndRenderGuests();
     } else {
-        var newId = generateId('G', guests);
-        guests.push({ id: newId, name: name, phone: phone, email: email, idNumber: idNumber });
-        saveGuests(guests);
-        showToast('Guest "' + name + '" added with ID ' + newId + '.', 'success');
+        showToast(res.error || 'Failed to save guest.', 'error');
     }
-    closeModal();
-    renderGuests();
 }
 
 /** View a guest's details and booking history in a modal. */
-function viewGuest(guestId) {
-    var guests = getGuests();
-    var guest = guests.find(function(g) { return g.id === guestId; });
+async function viewGuest(guestId) {
+    var guest = cachedGuests.find(function(g) { return g.id === guestId; });
     if (!guest) return;
 
-    var bookings = getBookings().filter(function(b) { return b.guestId === guestId; });
-    var rooms = getRooms();
+    var allBookings = await getBookings();
+    var bookings = allBookings.filter(function(b) { return b.guestId === guestId; });
+    var rooms = await getRooms();
 
     var bookingRows = '';
     if (bookings.length === 0) {
@@ -140,7 +145,7 @@ function viewGuest(guestId) {
         '<div class="detail-item"><span class="detail-label">Full Name</span><span class="detail-value">' + guest.name + '</span></div>' +
         '<div class="detail-item"><span class="detail-label">Phone</span><span class="detail-value">' + guest.phone + '</span></div>' +
         '<div class="detail-item"><span class="detail-label">Email</span><span class="detail-value">' + guest.email + '</span></div>' +
-        '<div class="detail-item"><span class="detail-label">ID / Passport</span><span class="detail-value">' + guest.idNumber + '</span></div></div>' +
+        '</div>' +
         '<h3 style="margin-top:1.5rem;margin-bottom:0.75rem;">Booking History</h3>' +
         '<div class="table-responsive"><table class="data-table"><thead><tr>' +
         '<th>Booking</th><th>Room</th><th>Dates</th><th>Total</th><th>Status</th></tr></thead>' +
@@ -150,22 +155,14 @@ function viewGuest(guestId) {
 }
 
 /** Delete a guest after confirmation. */
-function deleteGuest(guestId) {
-    var bookings = getBookings();
-    var activeBookings = bookings.filter(function(b) {
-        return b.guestId === guestId && (b.status === 'Confirmed' || b.status === 'Checked In');
-    });
-
-    if (activeBookings.length > 0) {
-        showToast('Cannot delete this guest — they have ' + activeBookings.length + ' active booking(s).', 'error');
-        return;
-    }
-
-    var guest = getGuests().find(function(g) { return g.id === guestId; });
-    if (confirm('Are you sure you want to delete guest "' + (guest ? guest.name : guestId) + '"? This cannot be undone.')) {
-        var guests = getGuests().filter(function(g) { return g.id !== guestId; });
-        saveGuests(guests);
-        showToast('Guest deleted successfully.', 'success');
-        renderGuests();
+async function deleteGuest(guestId) {
+    if (confirm('Are you sure you want to delete this guest?')) {
+        var res = await apiFetch('/api/guests.php', 'DELETE', { id: guestId });
+        if (res.success) {
+            showToast('Guest deleted.', 'success');
+            await fetchAndRenderGuests();
+        } else {
+            showToast(res.error || 'Failed to delete guest.', 'error');
+        }
     }
 }

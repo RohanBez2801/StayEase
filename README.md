@@ -1,61 +1,98 @@
-﻿# StayEase Hotel Booking System
+# StayEase Hotel Booking System (PHP & MySQL Edition)
 
-A fully functional, beginner-friendly Hotel Booking System built as a multi-page responsive web app using only **HTML, CSS, JavaScript, and localStorage**. 
+A fully functional Hotel Booking System originally built as a client-side prototype, now upgraded to a robust **PHP + MySQL** architecture while maintaining its beginner-friendly code structure and responsive UI.
 
-Designed specifically as a Grade 11 Computer Science coursework project, it focuses on clean code structure, core CRUD operations, date math, validation logic, and state management without the complexity of a backend server.
+This version moves all critical business rules (double-booking prevention, pricing, capacity checks) to the server-side, securing the system and providing a genuine relational database backend.
+
+## Architecture
+
+This project uses a hybrid approach:
+- **Guest Facing:** Traditional PHP server-rendered pages for search, checkout, and authentication.
+- **Admin Dashboard:** Preserves the dynamic, modal-heavy JavaScript application feel by communicating with PHP API endpoints via `fetch()`.
 
 ## Features
 
+### Guest Features
+- **Account Management:** User registration and login.
+- **Search Engine:** Check availability by date, location, and guest count. Overlap logic enforced server-side.
+- **Booking Flow:** Review room details, confirm stays, and simulate payment.
+- **My Bookings:** View active and past stays, and print receipts.
+
+### Admin Features (Dashboard)
 - **Dashboard:** At-a-glance hotel statistics (occupancy, income, recent bookings).
-- **Room Management:** Add, edit, and delete rooms. Tracks room type, price, capacity, and current status.
-- **Guest Management:** Maintain a guest database with validation for emails and phone numbers.
-- **Booking Engine:** 
-  - Dynamic cost calculation based on number of nights.
-  - Strict date validation (Check-out must be after check-in).
-  - Overlap detection (prevents double-booking a room on the same dates).
-  - Capacity checking (prevents booking 3 people into a 1-person room).
-- **Receipt Generation:** Automatically builds a printable receipt for confirmed bookings.
+- **Room Management:** Add, edit, and update room maintenance status.
+- **Guest Management:** Maintain a guest database.
+- **Booking Management:** Create bookings for guests, cancel bookings, and update check-in/out statuses.
 - **Reporting & Export:** CSS-only charts for visualising occupancy, and a button to export all booking data directly to a CSV file.
-- **Data Persistence:** Uses the browser's localStorage API to save all data.
-- **Responsive Design:** A custom, dark-navy and teal hotel-themed CSS stylesheet that works on desktop, tablet, and mobile.
 
 ## Tech Stack
 
-- **HTML5:** Semantic page structure (6 individual pages).
-- **CSS3:** Flexbox, CSS Grid, Custom Properties (Variables), Media Queries, Keyframe Animations. (No Tailwind or Bootstrap).
-- **Vanilla JavaScript:** DOM manipulation, array filtering/mapping, date mathematics, and local storage interfacing.
+- **Frontend:** HTML5, CSS3, Vanilla JavaScript (ES5/ES6) with async/await.
+- **Backend:** PHP (Session management, PDO for database access).
+- **Database:** MySQL / MariaDB (Relational schema, constraints, prepared statements).
+- **Security:** CSRF tokens for all state-changing operations, password hashing.
 
-## How to Run
+## How to Run Locally
 
-Because this project relies entirely on client-side technologies, it is incredibly easy to run:
-
-1. Clone or download this repository to your computer.
-2. Open the folder StayEase.
-3. Double-click on index.html to open it in your default web browser (Chrome, Firefox, Edge, etc.).
-4. The system will automatically detect that it's empty and inject sample data (rooms, guests, bookings) so you can test it immediately.
+1. **Prerequisites:** Ensure you have a PHP environment installed (e.g. XAMPP, WAMP, or MAMP) and a running MySQL server.
+2. **Database Setup:** 
+   - Open your MySQL management tool (e.g., phpMyAdmin).
+   - Create a database named `stayease` (or allow the script to create it).
+   - Import the `database/schema.sql` file. This will create all tables and insert the required seed data.
+3. **Configuration:**
+   - Open `includes/config.php` and verify the `DB_USER` and `DB_PASS` match your local MySQL credentials.
+4. **Run the Application:**
+   - Place the project folder in your web server's document root (e.g., `htdocs` for XAMPP).
+   - Navigate to `http://localhost/StayEase` in your browser.
+5. **Login Credentials:**
+   - The database seed includes a default administrator account:
+   - **Email:** `admin@stayease.local`
+   - **Password:** `admin123`
 
 ## Project Structure
 
-`
+```
 stayease/
-├── index.html              # Dashboard / Home
-├── rooms.html              # Room Management
-├── guests.html             # Guest Management
-├── bookings.html           # Booking Management
-├── reports.html            # Reports & Analytics
-├── documentation.html      # Coursework Documentation / Test Plan
+├── index.php                 # Guest Landing Page & Search
+├── api/                      # Admin JSON endpoints
+│   ├── bookings.php
+│   ├── dashboard.php
+│   ├── guests.php
+│   └── rooms.php
+├── admin/                    # Admin Dashboard interfaces
+│   ├── bookings.php
+│   ├── documentation.php
+│   ├── guests.php
+│   ├── index.php
+│   ├── reports.php
+│   └── rooms.php
+├── database/
+│   └── schema.sql            # MySQL table structure & seed data
+├── guest/                    # Guest interfaces & Auth
+│   ├── checkout.php
+│   ├── confirmation.php
+│   ├── login.php
+│   ├── logout.php
+│   ├── my-bookings.php
+│   ├── register.php
+│   └── search.php
+├── includes/                 # Core server logic
+│   ├── auth.php
+│   ├── booking.php
+│   ├── config.php
+│   ├── database.php
+│   ├── footer.php
+│   ├── functions.php
+│   └── header.php
 ├── css/
-│   └── style.css           # Single comprehensive stylesheet
+│   └── style.css             # Main stylesheet
 ├── js/
-│   ├── data.js             # LocalStorage helpers & sample data
-│   ├── utils.js            # Shared logic (dates, currency, modals, toasts)
-│   ├── dashboard.js        # Dashboard calculations
-│   ├── rooms.js            # Room CRUD & filtering
-│   ├── guests.js           # Guest CRUD & validation
-│   ├── bookings.js         # Booking logic & overlap detection
-│   └── reports.js          # Charts & CSV export
-└── README.md               # This file
-`
-
-## Resetting Data
-If you want to clear your changes and return the app to its original demo state, simply click the **"Reset Demo Data"** button located at the bottom of the sidebar navigation.
+│   ├── bookings.js
+│   ├── dashboard.js
+│   ├── data.js               # API Fetch wrapper
+│   ├── guests.js
+│   ├── reports.js
+│   ├── rooms.js
+│   └── utils.js              
+└── README.md                 
+```

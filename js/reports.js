@@ -3,15 +3,15 @@
    Display statistics, charts, and export data
    ========================================== */
 
-document.addEventListener('DOMContentLoaded', function() {
-    loadReports();
+document.addEventListener('DOMContentLoaded', async function() {
+    await loadReports();
 });
 
 /** Load and display all report data. */
-function loadReports() {
-    var bookings = getBookings();
-    var rooms = getRooms();
-    var guests = getGuests();
+async function loadReports() {
+    var bookings = await getBookings();
+    var rooms = await getRooms();
+    var guests = await getGuests();
 
     var activeBookings = bookings.filter(function(b) { return b.status !== 'Cancelled'; });
     var totalIncome = 0;
@@ -23,8 +23,11 @@ function loadReports() {
     }
 
     var availableRooms = rooms.filter(function(r) { return r.status === 'Available'; }).length;
-    var bookedRooms = rooms.filter(function(r) { return r.status === 'Booked'; }).length;
     var maintenanceRooms = rooms.filter(function(r) { return r.status === 'Maintenance'; }).length;
+    // Booked rooms count should logically come from the bookings, but for the chart we use (total - available - maintenance)
+    var bookedRooms = rooms.length - availableRooms - maintenanceRooms;
+    if (bookedRooms < 0) bookedRooms = 0;
+    
     var occupancyRate = rooms.length > 0 ? Math.round((bookedRooms / rooms.length) * 100) : 0;
 
     document.getElementById('reportTotalIncome').textContent = formatCurrency(totalIncome);
@@ -36,6 +39,9 @@ function loadReports() {
     renderBookingStatusChart(bookings);
     renderBookingTimeline(bookings, guests, rooms);
     renderReportTable(bookings, guests, rooms);
+    
+    // Store globally for CSV export
+    window.reportData = { bookings, guests, rooms };
 }
 
 /** Render a horizontal bar chart showing room occupancy. */
@@ -49,7 +55,7 @@ function renderRoomStatusChart(available, booked, maintenance, total) {
     container.innerHTML = '<div class="chart-bar-group">' +
         '<div class="chart-bar-item"><div class="chart-bar-label"><span class="chart-dot" style="background:var(--success)"></span>Available (' + available + ')</div>' +
         '<div class="chart-bar-track"><div class="chart-bar-fill" style="width:' + availPct + '%;background:var(--success)">' + availPct + '%</div></div></div>' +
-        '<div class="chart-bar-item"><div class="chart-bar-label"><span class="chart-dot" style="background:var(--info)"></span>Booked (' + booked + ')</div>' +
+        '<div class="chart-bar-item"><div class="chart-bar-label"><span class="chart-dot" style="background:var(--info)"></span>Booked/Occupied (' + booked + ')</div>' +
         '<div class="chart-bar-track"><div class="chart-bar-fill" style="width:' + bookedPct + '%;background:var(--info)">' + (bookedPct > 5 ? bookedPct + '%' : '') + '</div></div></div>' +
         '<div class="chart-bar-item"><div class="chart-bar-label"><span class="chart-dot" style="background:var(--warning)"></span>Maintenance (' + maintenance + ')</div>' +
         '<div class="chart-bar-track"><div class="chart-bar-fill" style="width:' + maintPct + '%;background:var(--warning)">' + (maintPct > 5 ? maintPct + '%' : '') + '</div></div></div></div>';
@@ -151,9 +157,8 @@ function renderBookingTimeline(bookings, guests, rooms) {
 
 /** Export all booking data as a CSV file. */
 function exportCSV() {
-    var bookings = getBookings();
-    var guests = getGuests();
-    var rooms = getRooms();
+    if (!window.reportData) return;
+    var { bookings, guests, rooms } = window.reportData;
     if (bookings.length === 0) { showToast('No bookings to export.', 'warning'); return; }
 
     var csv = 'Booking ID,Guest Name,Guest Email,Room Number,Room Type,Check-In,Check-Out,Nights,Price Per Night,Total Cost,Status\n';

@@ -1,4 +1,4 @@
-﻿/* ==========================================
+/* ==========================================
    StayEase - Dashboard Page
    Shows summary statistics and recent bookings
    ========================================== */
@@ -8,18 +8,19 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /** Load all dashboard data and update the display. */
-function loadDashboard() {
-    var rooms = getRooms();
-    var guests = getGuests();
-    var bookings = getBookings();
+async function loadDashboard() {
+    var statsRes = await apiFetch('/api/dashboard.php');
+    if (statsRes.success) {
+        var stats = statsRes.data;
+        document.getElementById('totalRooms').textContent = stats.totalRooms;
+        document.getElementById('availableRooms').textContent = stats.availableRooms;
+        document.getElementById('totalBookings').textContent = stats.totalBookings;
+        document.getElementById('checkedInGuests').textContent = stats.checkedInGuests;
+    }
 
-    document.getElementById('totalRooms').textContent = rooms.length;
-    document.getElementById('availableRooms').textContent =
-        rooms.filter(function(r) { return r.status === 'Available'; }).length;
-    document.getElementById('totalBookings').textContent = bookings.length;
-    document.getElementById('checkedInGuests').textContent =
-        bookings.filter(function(b) { return b.status === 'Checked In'; }).length;
-
+    var bookings = await getBookings();
+    var guests = await getGuests();
+    var rooms = await getRooms();
     renderRecentBookings(bookings, guests, rooms);
 }
 
@@ -29,7 +30,7 @@ function renderRecentBookings(bookings, guests, rooms) {
     if (!tbody) return;
 
     if (bookings.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty-table">No bookings yet. <a href="bookings.html">Create your first booking</a>.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-table">No bookings yet. <a href="bookings.php">Create your first booking</a>.</td></tr>';
         return;
     }
 
@@ -44,6 +45,7 @@ function renderRecentBookings(bookings, guests, rooms) {
         var room = rooms.find(function(r) { return r.number === booking.roomNumber; });
         var nights = calculateNights(booking.checkIn, booking.checkOut);
         var total = nights * (room ? room.price : 0);
+        // Note: For actual total, we should fetch it from DB, but this matches original UI logic for dashboard
 
         html += '<tr>' +
             '<td>' + booking.id + '</td>' +

@@ -1,0 +1,53 @@
+<?php
+require_once __DIR__ . '/../includes/auth.php';
+requireAdmin();
+$page_title = 'Bookings';
+$extra_scripts = '<script src="/js/bookings.js"></script>';
+require_once __DIR__ . '/../includes/header.php';
+?>
+<div class="page-header">
+    <div>
+        <h1>Manage Bookings</h1>
+        <p>Create and manage reservations.</p>
+    </div>
+    <button class="btn btn-primary" onclick="openNewBookingModal()">📅 New Booking</button>
+</div>
+
+<div class="filter-bar">
+    <input type="search" id="bookingSearch" class="search-input" placeholder="🔍 Search by booking ID, guest name, or room...">
+    <div class="filter-group">
+        <select id="filterBookingStatus">
+            <option value="">All Statuses</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Checked In">Checked In</option>
+            <option value="Checked Out">Checked Out</option>
+            <option value="Cancelled">Cancelled</option>
+        </select>
+        <select id="filterBookingRoom">
+            <option value="">All Rooms</option>
+            <!-- Populated dynamically -->
+        </select>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Booking ID</th>
+                <th>Guest</th>
+                <th>Room</th>
+                <th>Check-In</th>
+                <th>Check-Out</th>
+                <th>Nights</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="bookingsTableBody">
+            <!-- Booking rows dynamically generated here -->
+        </tbody>
+    </table>
+</div>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>

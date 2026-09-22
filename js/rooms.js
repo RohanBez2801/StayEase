@@ -3,16 +3,23 @@
    Add, edit, delete, search, and filter rooms
    ========================================== */
 
-document.addEventListener('DOMContentLoaded', function() {
-    renderRooms();
+let cachedRooms = [];
+
+document.addEventListener('DOMContentLoaded', async function() {
+    await fetchAndRenderRooms();
     document.getElementById('roomSearch').addEventListener('input', renderRooms);
     document.getElementById('filterType').addEventListener('change', renderRooms);
     document.getElementById('filterStatus').addEventListener('change', renderRooms);
 });
 
+async function fetchAndRenderRooms() {
+    cachedRooms = await getRooms();
+    renderRooms();
+}
+
 /** Display all rooms as cards, applying current search/filter. */
 function renderRooms() {
-    var rooms = getRooms();
+    var rooms = cachedRooms;
     var searchTerm = document.getElementById('roomSearch').value.toLowerCase();
     var filterType = document.getElementById('filterType').value;
     var filterStatus = document.getElementById('filterStatus').value;
@@ -46,7 +53,7 @@ function renderRooms() {
             '<div class="room-type">' + getRoomTypeIcon(room.type) + ' ' + room.type + ' (' + (room.branch || 'Unknown') + ')</div>' +
             '<p class="room-description">' + room.description + '</p>' +
             '<div class="room-details"><span class="room-price">' + formatCurrency(room.price) + ' <small>/ night</small></span>' +
-            '<span class="room-capacity">👥 ' + room.capacity + (room.capacity === 1 ? ' Guest' : ' Guests') + '</span></div></div>' +
+            '<span class="room-capacity">👥 ' + room.capacity + (room.capacity == 1 ? ' Guest' : ' Guests') + '</span></div></div>' +
             '<div class="room-card-actions">' +
             '<button class="btn btn-sm btn-secondary" onclick="openEditRoomModal(\'' + room.number + '\')">✏️ Edit</button>' +
             '<button class="btn btn-sm btn-danger" onclick="deleteRoom(\'' + room.number + '\')">🗑️ Delete</button></div></div>';
@@ -71,8 +78,7 @@ function openAddRoomModal() {
 
 /** Open the modal to edit an existing room. */
 function openEditRoomModal(roomNumber) {
-    var rooms = getRooms();
-    var room = rooms.find(function(r) { return r.number === roomNumber; });
+    var room = cachedRooms.find(function(r) { return r.number === roomNumber; });
     if (!room) return;
     openModal('Edit Room ' + roomNumber, getRoomFormHtml(room));
 }
@@ -84,7 +90,7 @@ function getRoomFormHtml(room) {
         '<div class="form-group"><label for="roomNumber">Room Number *</label>' +
         '<input type="text" id="roomNumber" value="' + (room ? room.number : '') + '" ' + (isEdit ? 'readonly' : '') + ' required placeholder="e.g. 101"></div>' +
         '<div class="form-group"><label for="roomBranch">Branch / City *</label>' +
-        '<input type="text" id="roomBranch" value="' + (room && room.branch ? room.branch : '') + '" required placeholder="e.g. Cape Town"></div>' +
+        '<input type="text" id="roomBranch" value="' + (room && room.branch ? room.branch : 'Cape Town') + '" readonly title="Only Cape Town supported in demo"></div>' +
         '<div class="form-row"><div class="form-group"><label for="roomType">Room Type *</label>' +
         '<select id="roomType" required><option value="">Select type...</option>' +
         '<option value="Single"' + (room && room.type === 'Single' ? ' selected' : '') + '>Single</option>' +
@@ -94,12 +100,7 @@ function getRoomFormHtml(room) {
         '<div class="form-group"><label for="roomStatus">Status *</label>' +
         '<select id="roomStatus" required>' +
         '<option value="Available"' + (room && room.status === 'Available' ? ' selected' : '') + '>Available</option>' +
-        '<option value="Booked"' + (room && room.status === 'Booked' ? ' selected' : '') + '>Booked</option>' +
         '<option value="Maintenance"' + (room && room.status === 'Maintenance' ? ' selected' : '') + '>Maintenance</option></select></div></div>' +
-        '<div class="form-row"><div class="form-group"><label for="roomPrice">Price per Night (R) *</label>' +
-        '<input type="number" id="roomPrice" value="' + (room ? room.price : '') + '" required min="1" step="0.01" placeholder="e.g. 1200"></div>' +
-        '<div class="form-group"><label for="roomCapacity">Capacity (Guests) *</label>' +
-        '<input type="number" id="roomCapacity" value="' + (room ? room.capacity : '') + '" required min="1" max="10" placeholder="e.g. 2"></div></div>' +
         '<div class="form-group"><label for="roomDescription">Description</label>' +
         '<textarea id="roomDescription" rows="3" placeholder="Brief description of the room...">' + (room ? room.description : '') + '</textarea></div>' +
         '<div class="form-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>' +
@@ -107,54 +108,50 @@ function getRoomFormHtml(room) {
 }
 
 /** Save a new or edited room. */
-function saveRoom(event, editingNumber) {
+async function saveRoom(event, editingNumber) {
     event.preventDefault();
-    var rooms = getRooms();
     var number = document.getElementById('roomNumber').value.trim();
-    var branch = document.getElementById('roomBranch').value.trim();
     var type = document.getElementById('roomType').value;
-    var price = parseFloat(document.getElementById('roomPrice').value);
-    var capacity = parseInt(document.getElementById('roomCapacity').value);
     var status = document.getElementById('roomStatus').value;
     var description = document.getElementById('roomDescription').value.trim();
 
-    if (!number || !branch || !type || isNaN(price) || isNaN(capacity)) {
+    if (!number || !type) {
         showToast('Please fill in all required fields.', 'error');
         return;
     }
 
-    if (editingNumber) {
-        for (var i = 0; i < rooms.length; i++) {
-            if (rooms[i].number === editingNumber) {
-                rooms[i] = { number: number, branch: branch, type: type, price: price, capacity: capacity, status: status, description: description };
-                break;
-            }
-        }
-        saveRooms(rooms);
-        showToast('Room ' + number + ' updated successfully!', 'success');
+    var btn = event.target.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    
+    var res = await apiFetch('/api/rooms.php', 'POST', {
+        action: 'save',
+        id: editingNumber,
+        number: number,
+        type: type,
+        status: status,
+        description: description
+    });
+    
+    btn.disabled = false;
+    
+    if (res.success) {
+        showToast('Room saved successfully!', 'success');
+        closeModal();
+        await fetchAndRenderRooms();
     } else {
-        if (rooms.some(function(r) { return r.number === number; })) {
-            showToast('Room number ' + number + ' already exists.', 'error');
-            return;
-        }
-        rooms.push({ number: number, branch: branch, type: type, price: price, capacity: capacity, status: status, description: description });
-        saveRooms(rooms);
-        showToast('Room ' + number + ' added successfully!', 'success');
+        showToast(res.error || 'Failed to save room.', 'error');
     }
-    closeModal();
-    renderRooms();
 }
 
 /** Delete a room after confirmation. */
-function deleteRoom(roomNumber) {
-    if (roomHasActiveBookings(roomNumber)) {
-        showToast('Cannot delete room ' + roomNumber + ' — it has active bookings.', 'error');
-        return;
-    }
-    if (confirm('Are you sure you want to delete Room ' + roomNumber + '? This action cannot be undone.')) {
-        var rooms = getRooms().filter(function(r) { return r.number !== roomNumber; });
-        saveRooms(rooms);
-        showToast('Room ' + roomNumber + ' deleted.', 'success');
-        renderRooms();
+async function deleteRoom(roomNumber) {
+    if (confirm('Are you sure you want to delete Room ' + roomNumber + '?')) {
+        var res = await apiFetch('/api/rooms.php', 'DELETE', { number: roomNumber });
+        if (res.success) {
+            showToast('Room ' + roomNumber + ' deleted.', 'success');
+            await fetchAndRenderRooms();
+        } else {
+            showToast(res.error || 'Failed to delete room.', 'error');
+        }
     }
 }
