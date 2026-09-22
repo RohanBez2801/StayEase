@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rooms - Book with Shipiki</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="mobile-header">
+        <button class="menu-toggle" onclick="toggleMobileMenu()">☰</button>
+        <span class="logo">🏨 Book with Shipiki</span>
+    </header>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">🏨 Shipiki</div>
+            <p class="tagline">Hotel Reservation System</p>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html" class="nav-link"><span class="nav-icon">📊</span> Dashboard</a></li>
+            <li><a href="rooms.html" class="nav-link"><span class="nav-icon">🛏️</span> Rooms</a></li>
+            <li><a href="guests.html" class="nav-link"><span class="nav-icon">👥</span> Guests</a></li>
+            <li><a href="bookings.html" class="nav-link"><span class="nav-icon">📅</span> Bookings</a></li>
+            <li><a href="reports.html" class="nav-link"><span class="nav-icon">📈</span> Reports</a></li>
+            <li><a href="documentation.html" class="nav-link"><span class="nav-icon">📖</span> Documentation</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <button class="btn-outline" onclick="resetDemoData()">🔄 Reset Demo Data</button>
+        </div>
+    </nav>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileMenu()"></div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <div>
+                <h1>Manage Rooms</h1>
+                <p>Add, edit, or remove hotel rooms.</p>
+            </div>
+            <button class="btn btn-primary" onclick="openAddRoomModal()">+ Add New Room</button>
+        </div>
+
+        <div class="filter-bar">
+            <input type="search" id="roomSearch" class="search-input" placeholder="🔍 Search rooms by number or type...">
+            <div class="filter-group">
+                <select id="filterType">
+                    <option value="">All Types</option>
+                    <option value="Single">Single</option>
+                    <option value="Double">Double</option>
+                    <option value="Family">Family</option>
+                    <option value="Suite">Suite</option>
+                </select>
+                <select id="filterStatus">
+                    <option value="">All Statuses</option>
+                    <option value="Available">Available</option>
+                    <option value="Booked">Booked</option>
+                    <option value="Maintenance">Maintenance</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="rooms-grid" id="roomsGrid">
+            <!-- Room cards dynamically generated here -->
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal modal-medium" id="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle"></h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="js/data.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/rooms.js"></script>
+</body>
+</html>

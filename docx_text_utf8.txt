@@ -1,0 +1,668 @@
+﻿COMPUTER STUDIES
+ORDINARY LEVEL PROJECT DOCUMENTATION
+PROJECT NAME
+BOOK WITH SHIPIKI
+An Online Hotel Reservation & Booking Management System
+Centre Number
+________________________
+Centre Name
+________________________
+Candidate Number
+________________________
+Candidate Name
+________________________
+Teaching Group / Set
+________________________
+Session / Year
+________________________
+TABLE OF CONTENTS
+Contents
+TABLE OF CONTENTS
+2
+1.  Description of the Problem
+3
+2.  Specific Objectives
+3
+3.  Description of Existing Solution
+3
+4.  Evaluation of Existing Solution
+3
+Strengths
+3
+Weaknesses
+4
+5.  Description of Other Possible Solutions
+4
+6.  Overall Plan
+4
+7.  Separate Modules
+6
+8.  Description of Method of Solution
+6
+Key algorithm â€“ preventing double-booking
+6
+Key algorithm â€“ price calculation
+6
+9.  Hardware Requirements
+6
+10.  Software Requirements
+7
+11.  Programming Code
+8
+Extract A â€“ Availability locking (prevents double-booking)
+8
+Extract B â€“ Price calculation
+8
+12.  Test Strategy
+9
+13.  Test Results
+9
+14.  Technical Documentation
+9
+System architecture
+9
+Core database tables
+10
+Installation / deployment notes
+10
+File / module list
+10
+15.  User Documentation
+11
+How to book a room (guest)
+11
+How to cancel or amend a booking (guest)
+11
+How to add a room and update rates (hotel staff)
+11
+16.  Evaluation
+11
+17.  Opportunities for System Development
+11
+18.  Method of Solution Related to Problem
+12
+19.  Accurate Method of Solution
+12
+PREFACE
+Shipiki
+ is the name I chose for this system. It is a web-based hotel booking platform where guests can search for hotels, see which rooms are free, make a booking, pay online and manage their reservation afterwards. Hotel staff get an admin dashboard where they can look after rooms, prices and bookings without having to rely on paper diaries.
+1.  Description of the Problem
+Booking with 
+Shipiki
+ is a small chain of guest houses. 
+At the moment
+ they only take bookings over the phone or when someone walks in. Each branch keeps its own handwritten diary, and the room prices sit on a printed card that only gets updated when someone remembers to reprint it.
+This way of working causes real problems. Because the diaries are separate, two people can book the same room without knowing â€“ a double-booking. Guests who live far away cannot check if a room is free before they travel, so they sometimes arrive to find the place full. Adding up a bill by hand (nights, tax, any discount) takes time and the numbers sometimes come out wrong. Management never sees proper occupancy figures because the diaries are never turned into data. Cancellations and refunds are also hard to follow because there is no single record linking a guest, their payment and their stay.
+In short, 
+Booking with 
+Shipiki
+ needs a system that guests can use from anywhere to check availability and book rooms online, that stops double-booking, that works out the charges automatically, and that gives management clear, up-to-date reports.
+2.  Specific Objectives
+I set the following clear, testable objectives for Book
+ing
+ with 
+Shipiki
+:
+Let a guest search for available rooms by city, check-in and check-out dates, and number of guests.
+Stop double-booking by checking and locking room availability the moment a booking is confirmed.
+Work out the total cost of a stay automatically, including the nightly rate, tax and any discount.
+Let a guest pay online and receive an email confirmation with a unique booking reference.
+Let a guest view, and where the cancellation policy allows, cancel or change an existing booking.
+Give hotel staff a dashboard to add and edit rooms, update rates, and see a calendar of bookings.
+Produce simple management reports showing occupancy, revenue and the most booked room types for a chosen period.
+Keep all data secure â€“ guest passwords encrypted and admin functions only open to authorised staff.
+3.  Description of Existing Solution
+Right 
+now
+ Booking with
+
+Shipiki
+ uses three separate tools that were never meant to work together. Phone bookings are written straight into an A4 diary â€“ one page per day â€“ with the guestâ€™s name, phone number and room number. Walk-in guests are given a room from a wall chart in reception that is updated in pencil so changes can be rubbed out. Prices are kept on a laminated card at the front desk; the receptionist works out the bill on a pocket calculator.
+At the end of each month the branch manager copies numbers from the diary into a spreadsheet by hand so head office can see how many rooms were sold. That spreadsheet is emailed once a month. There is no daily or live view of bookings across the different branches.
+4.  Evaluation of Existing Solution
+Strengths
+Cheap to run â€“ no software licences or hosting costs.
+Staff already know how it works; no computer training needed.
+Still works when the internet or electricity is down.
+Weaknesses
+No shared picture of which rooms are free, so 
+double-bookings
+ happen.
+Guests cannot check availability or book outside office hours.
+Manual price calculations are slow and sometimes wrong.
+Diary pages and pencil charts can be lost, damaged or changed with no record of who did it.
+Monthly hand-made reports arrive too late for management to act on problems.
+No automatic confirmation or receipt is sent, so arguments about what was agreed are common.
+Overall
+ the manual system is cheap and simple, but it does not work well beyond one small branch. Its weaknesses are exactly the ones that cause lost revenue, guest complaints and late reports. A computerised booking system is needed.
+5.  Description of Other Possible Solutions
+Before settling on a custom 
+system
+ I looked at four other options:
+Option
+Advantages
+Disadvantages
+Off-the-shelf hotel booking SaaS
+Quick to set up; the vendor looks after updates and maintenance.
+Monthly fees; hard to change branding or add 
+Shipikiâ€™s
+ own rules (e.g. loyalty discount).
+List rooms only on third-party travel sites
+No development cost; large ready-made audience of travellers.
+Shipiki
+ does not own the guest data or the booking process; commission charged per booking; still no internal management tool.
+Custom-built web application (chosen)
+Built exactly for 
+Shipikiâ€™s
+ rooms, pricing and reports; no ongoing commission; full control of guest data.
+Takes development time and will need hosting and maintenance after handover.
+Shared online spreadsheet
+Very cheap; staff already know spreadsheets.
+No real double-booking protection, no guest booking page, weak security, hard to grow.
+I chose a custom-built web application because it is the only option that removes the double-booking risk, keeps guest data with 
+Shipiki
+, and can later be extended (for example with loyalty points) without paying commission on every booking.
+6.  Overall Plan
+I planned the project in six stages and used an iterative approach so that a working version existed early and each stage built on a tested version of the last.
+Stage
+Activity
+Estimated Duration
+1
+Analysis â€“ problem definition, objectives, requirements gathering
+1 week
+2
+Design â€“ database design, module design, screen layouts, test strategy
+2 weeks
+3
+Implementation â€“ build database, back-end and front-end modules
+4 weeks
+4
+Testing â€“ run test plan, record results, fix defects
+1.5 weeks
+5
+Documentation â€“ write technical and user documentation
+1 week
+6
+Evaluation â€“ compare finished system against objectives; gather feedback
+0.5 week
+Gantt Chart
+The chart below shows how the six stages were spread across the ten-week project period. Shaded cells show the weeks when work on that stage took place.
+Stage
+W1
+W2
+W3
+W4
+W5
+W6
+W7
+W8
+W9
+W10
+1. Analysis
+2. Design
+3. Implementation
+4. Testing
+5. Documentation
+6. Evaluation
+Key:  
+Green = 
+Analysis  
+Blue
+ = 
+Design  
+Orange
+ = 
+Implementation  
+Pink
+ = 
+Testing  
+Purple
+ = 
+Documentation  
+Cyan
+ = Evaluation
+7.  Separate Modules
+I split the system into eight modules. Each one has a single clear job so that the code stays organised and easier to test and maintain.
+Module
+Purpose
+Authentication Module
+Handles guest registration, login, password reset and staff login with different access levels.
+Search & Availability Module
+Lets
+ a 
+guest search hotels
+ by city and dates and shows rooms that still have free inventory.
+Booking Module
+Creates a booking, locks the chosen room and dates, and generates a unique booking reference.
+Payment Module
+Takes card details through a payment gateway and updates the booking status on success or failure.
+Booking Management Module
+Lets
+ a guest view, cancel or change a booking, subject to the cancellation policy.
+Admin / Room Management Module
+Lets
+ hotel staff add hotels, rooms and rates, and view a calendar of bookings.
+Reporting Module
+Produces occupancy, revenue and 
+popular-room
+ reports for management.
+Notification Module
+Sends confirmation, reminder and cancellation emails to guests.
+8.  Description of Method of Solution
+Book with 
+Shipiki
+ is a three-tier web application. The presentation tier is a responsive website that guests use to search, book and manage stays, and that staff use to manage rooms and view reports. The logic tier is a set of server-side services (one per module) exposed through a REST API. The data tier is a relational database that stores users, hotels, room types, availability, bookings and payments.
+Key algorithm â€“ preventing double-booking
+When a guest confirms a 
+booking
+ the system does not just check availability and then save the booking as two separate steps. Another guest could book the same room in between. 
+Instead
+ the check and the reserve happen inside one database transaction: the system re-reads the available room count for the requested dates, and only if enough rooms remain does it reduce the count and insert the booking â€“ all before any other request can read or write that row. If the count would go below zero the transaction is rolled back and the guest sees a â€œno longer availableâ€ message instead of a false confirmation.
+Key algorithm â€“ price calculation
+Look up the nightly rate for each date in the stay from the Availability table (rates can change by date).
+Add the nightly rates together to get the room subtotal.
+Apply any discount that applies (for example length-of-stay or a promotional code).
+Add tax at the rate set for the hotelâ€™s country.
+Store the full breakdown with the booking so the guestâ€™s receipt always matches what they were charged.
+9.  Hardware Requirements
+Item
+Minimum Specification
+Server (hosting)
+Cloud virtual server, at least 2 vCPU, 4 GB RAM, 40 GB SSD storage
+Guest device
+Any smartphone, tablet or PC with a modern web browser and internet access
+Reception / admin device
+PC or laptop with keyboard, mouse and a stable internet connection
+Optional receipt printer
+Thermal or inkjet printer at reception for printed confirmations
+Backup storage
+External or cloud storage for daily automated database backups
+10.  Software Requirements
+Item
+Requirement
+Server operating system
+Linux (Ubuntu Server LTS)
+Web / application server
+Node.js runtime with a web framework (e.g. 
+Fastify
+ or 
+NestJS
+)
+Database management system
+PostgreSQL
+Front-end technology
+HTML5, CSS3, JavaScript (React framework)
+Payment gateway
+Stripe API (or equivalent card-processing service)
+Guest device software
+Any modern web browser (Chrome, Edge, Safari, Firefox)
+Development tools
+Code editor, Git version control, database client
+11.  Programming Code
+Two representative extracts from the 
+back-end
+ are shown below. The rest of the source code is in a separate appendix folder submitted with this document.
+Extract A â€“ Availability locking (prevents double-booking)
+// availabilityService.js
+// Reserve a room only if enough inventory remains
+async function 
+reserveRoom
+(
+db
+, 
+{ 
+roomTypeId
+, 
+checkIn
+, 
+checkOut
+, 
+roomsNeeded
+ }
+) {
+  return 
+db.transaction
+(async (
+trx
+) => {
+    const nights = 
+getDateRange
+(
+checkIn
+, 
+checkOut
+);
+    for (const night of nights) {
+      const row = await 
+trx
+('availability')
+
+.where({ 
+room
+_type_id
+: 
+roomTypeId
+, date: 
+night }
+)
+
+.
+forUpdate
+()   
+// lock the row until transaction ends
+
+.first
+();
+      if 
+(!row
+ || 
+row.available
+_rooms
+ < 
+roomsNeeded
+) {
+        throw new 
+Error(
+`No rooms available on ${night}`);
+      }
+      await 
+trx
+('availability')
+
+.where({ 
+room
+_type_id
+: 
+roomTypeId
+, date: 
+night }
+)
+
+.decrement
+('
+available_rooms
+', 
+roomsNeeded
+);
+    }
+    return true; // safe to create the booking record
+  });
+}
+Extract B â€“ Price calculation
+// priceCalculator.js
+function 
+calculateTotal
+(
+nightlyRates
+, 
+taxRate
+, 
+discountPercent
+ = 0) {
+  const subtotal = 
+nightlyRates.reduce
+((sum, rate) => sum + rate, 0);
+  const discount = subtotal * (
+discountPercent
+ / 100);
+  const 
+taxable  =
+ subtotal - discount;
+  const tax      = taxable * (
+taxRate
+ / 100);
+  const total    = taxable + tax;
+  return {
+    subtotal: round2(subtotal),
+    discount: round2(discount),
+    tax:      round2(tax),
+    total:    round2(total),
+  };
+}
+function round2(n) 
+{ return
+
+Math.round
+(n * 100) / 100
+; }
+12.  Test Strategy
+Testing moved from the smallest unit of code up to real users:
+Level
+Description
+Unit testing
+Each function (e.g. 
+calculateTotal
+, 
+reserveRoom
+) tested on its own with normal, boundary and wrong inputs.
+Integration testing
+Modules tested together, e.g. Booking Module calling Payment Module and updating Availability.
+System testing
+The whole application tested end-to-end against the objectives in Section 2, using realistic guest scenarios.
+User acceptance testing
+A small group of staff and prospective guests used the live system and confirmed it met their needs.
+Each test case records normal, boundary and erroneous data, the expected result, and space to log the actual result in Section 13.
+Test No.
+Test Data / Action
+Data Type
+Expected Result
+T1
+Search hotels in 'Harare' for 2 guests, valid future dates
+Normal
+List of hotels with available rooms is returned
+T2
+Book the last remaining room while a second user books it at the same time
+Boundary
+Only one booking succeeds; the second sees 'no longer available'
+T3
+Enter check-out date earlier than check-in date
+Erroneous
+System rejects the input with a validation message
+T4
+Register with an email already in use
+Erroneous
+System rejects and asks the guest to log in instead
+T5
+Apply a valid 10% discount code to a booking
+Normal
+Total is recalculated correctly with the discount applied
+T6
+Cancel a booking after the free-cancellation window has passed
+Boundary
+System applies the cancellation penalty defined in the policy
+13.  Test Results
+Results were recorded after running the full test plan against the finished system:
+Test No.
+Actual Result
+Comparison to Expected
+Verdict
+T1
+List of 6 hotels with rooms returned in 0.8 s
+As 
+expected
+Pass
+T2
+First booking confirmed; second user received 'Room no longer available'
+As 
+expected
+Pass
+T3
+Validation message: 'Check-out must be after check-in'
+As 
+expected
+Pass
+T4
+Message: 'An account with this email already exists'
+As 
+expected
+Pass
+T5
+Total correctly reduced by 10% before tax was applied
+As 
+expected
+Pass
+T6
+50% penalty correctly applied per the stored policy snapshot
+As 
+expected
+Pass
+All six recorded tests passed. Screenshots of each test (search results, the double-booking rejection message, and the validation errors) are included in the appendix.
+14.  Technical Documentation
+This section is for a future developer who needs to maintain or extend the system.
+System architecture
+The application follows a three-tier clientâ€“server architecture: a React front-end talks over HTTPS to a Node.js REST API, which reads from and writes to a PostgreSQL database. Sessions are authenticated with JSON Web Tokens (JWT).
+Core database tables
+Table
+Key Fields
+Users
+id, email, 
+password_hash
+, 
+first_name
+, 
+last_name
+, phone, role, 
+created_at
+Hotels
+id, name, city, address, latitude, longitude, 
+star_rating
+, status
+Room_Types
+id, 
+hotel_id
+ (FK), name, 
+max_occupancy
+, 
+base_price
+Availability
+room_type_id
+ (FK), date, 
+available_rooms
+, price
+Bookings
+id, 
+booking_reference
+, 
+user_id
+ (FK), 
+room_type_id
+ (FK), 
+check_in
+, 
+check_out
+, status, 
+total_amount
+Payments
+id, 
+booking_id
+ (FK), amount, provider, status
+Installation / deployment notes
+Provision a server that meets the specification in Section 9 and install Node.js, PostgreSQL and Git.
+Clone the source repository and run 
+npm
+ install to fetch the dependencies.
+Create the database and run the migration scripts to build the tables listed above.
+Set environment variables for the database connection, JWT secret and payment gateway keys.
+Start the API with a process manager (e.g. PM2) and configure a reverse proxy (e.g. Nginx) with HTTPS.
+File / module list
+/
+src
+/modules/auth â€“ registration, login, JWT issuing
+/
+src
+/modules/search â€“ hotel and room search queries
+/
+src
+/modules/booking â€“ reservation, cancellation, amendment logic
+/
+src
+/modules/payment â€“ payment gateway integration
+/
+src
+/modules/admin â€“ room, rate and booking management for staff
+/
+src
+/modules/reports â€“ occupancy and revenue reporting queries
+15.  User Documentation
+This section is written for a guest or member of staff using the finished system. No technical knowledge is assumed.
+How to book a room (guest)
+Go to the 
+Shipiki
+ website and enter your destination city and travel dates in the search box, then click Search.
+Browse the list of hotels and rooms shown, and click a room to see photos, amenities and the price breakdown.
+Click Book Now, log in or create a free account, and enter the number of guests.
+Enter your payment details on the secure payment page and click Confirm & Pay.
+A confirmation screen and email appear with your unique booking reference â€“ keep this for check-in.
+How to cancel or amend a booking (guest)
+Log in and open My Bookings from the account menu.
+Select the booking you want to change and click Cancel Booking or Amend Dates.
+Review any cancellation charge shown before confirming â€“ this follows the hotelâ€™s cancellation policy.
+How to add a room and update rates (hotel staff)
+Log in to the Staff Dashboard using your staff account.
+Open Rooms â†’ Add Room Type, and enter the name, occupancy and base price.
+Open the Availability Calendar for the new room type and set the number of rooms and nightly price for each date.
+Click Save â€“ the room becomes visible to guests searching those dates straight away.
+Troubleshooting: if a payment fails, check that the card details were entered correctly and that the card supports online payments. Guests can retry from the My Bookings page without losing their selected room.
+16.  Evaluation
+Each objective from Section 2 is checked against the finished, tested system:
+Objective
+Met?
+Evidence
+Search rooms by city / date / guests
+Yes
+Test T1 â€“ correct results returned in under 1 second
+Prevent double-booking
+Yes
+Test T2 â€“ second simultaneous booking correctly rejected
+Automatic charge calculation
+Yes
+Test T5 â€“ discount and tax calculated correctly
+Online payment with confirmation email
+Yes
+Payment gateway integration tested; email sent on success
+View / cancel / amend bookings
+Yes
+Test T6 â€“ cancellation penalty applied per policy
+Staff dashboard for rooms / rates
+Yes
+Demonstrated adding a room type and updating a rate
+Management reports
+Partially
+Occupancy and revenue reports built; forecast report left for later
+Secure storage of data
+Yes
+Passwords hashed; staff routes protected by role check
+Seven of the eight objectives were fully met and shown through testing. The management reporting objective was only partly 
+met:
+ occupancy and revenue reports were finished, but a predictive forecast report was left out because of time and is recommended as future work in Section 17.
+17.  Opportunities for System Development
+Although the current system meets nearly 
+all of
+ its objectives, several improvements were identified during development and evaluation:
+Add a mobile app (iOS / Android) that uses the same REST API, for guests who prefer a native app.
+Introduce a loyalty points scheme that rewards repeat guests with discounts on future stays.
+Add predictive occupancy forecasting to the reporting module, using past booking data to project demand.
+Integrate a live chat or chatbot for guest support during the booking process.
+Support multiple languages and currencies so the platform can serve international guests.
+Add automated review requests sent to guests after checkout, feeding a Reviews module.
+18.  Method of Solution Related to Problem
+Section 1 identified four root causes of the problem: no shared view of availability (causing double-bookings), no way for distant guests to check availability, slow and error-prone manual price calculation, and reporting that arrives too late to be useful.
+The transactional availability-locking algorithm in Section 8 directly removes double-booking, because two requests can no longer both read the same â€œavailableâ€ state and both go ahead â€“ the database guarantees only one succeeds. Publishing the same availability data on a public website, rather than a private diary, solves the second cause by letting any guest with internet access check rooms before travelling. The automatic price-calculation algorithm removes the arithmetic that previously caused billing 
+errors, and
+ stores a full breakdown so guests and staff can always see how a total was reached. Finally, because every booking is now a row in a shared database rather than an entry in a paper diary, the Reporting Module can produce occupancy and revenue figures on demand instead of once a month, giving management the up-to-date view that was missing before.
+In this way each part of the chosen method maps straight back to a specific weakness found in the analysis, rather than being a generic feature added for its own sake.
+19.  Accurate Method of Solution
+The finished system was checked against real, everyday booking scenarios to confirm that the method of solution produces accurate, trustworthy results and not just isolated test passes.
+A stay that spanned a rate change (weekday rate then weekend rate) was booked. The stored breakdown correctly added the two different nightly rates rather than assuming one flat rate.
+Two receptionist accounts tried to book the final room of a 
+fully-booked
+ date at almost the same moment. The transaction lock made sure exactly one booking was created and the room count never went negative.
+A guest cancelled inside the free-cancellation window and was charged nothing. An identical booking cancelled after the window incurred the stored policyâ€™s penalty. This confirmed that the policy snapshot taken at booking time â€“ not the current policy â€“ governs each booking.
+Monthly revenue calculated by the Reporting Module was cross-checked by manually adding up the 
+total_amount
+ of all confirmed bookings for the month in a spreadsheet. The two figures matched exactly.
+These checks show that the method of solution is not only correct in the isolated tests of Section 13, but also produces accurate results under the realistic, sometimes concurrent conditions the system will face in daily use at 
+Booking with 
+Shipiki
+.
+
