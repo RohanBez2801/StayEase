@@ -2,7 +2,7 @@
 // includes/database.php
 require_once __DIR__ . '/config.php';
 
-function getDBConnection() {
+function getDBConnection(): PDO {
     static $pdo = null;
 
     if ($pdo === null) {
